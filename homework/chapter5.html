@@ -7,7 +7,7 @@
 <div class="container">
     <h1>People of Vue</h1>
     <ul class="list-group">
-        <li v-for="(candidate, index) in candidates" :key="index" class="list-group-item">
+        <li v-for="(candidate, index) in sorted" :key="index" class="list-group-item">
             {{candidate.name}} {{candidate.votes}}
             <!-- increase votes 'on:click'-->
             <button class="btn btn-default" @click="candidate.votes++">Vote</button>
@@ -16,9 +16,9 @@
     <!-- listening for keyboard event -->
     <input @keyup.delete="clear" class="form-control" placeholder="press 'delete' to reset">
     <!-- display the name of the 'mayor' using a computed property-->
-    <h2>Our mayor is {{mayor.name}}!</h2>
+    <h2>Our mayor is {{winner.name}}!</h2>
     <pre>{{ $data }}</pre>
-    <pre>{{ mayor }}</pre>
+    <pre>{{ winner }}</pre>
 </div>
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.js"></script>
@@ -34,13 +34,21 @@
             ]
         },
         computed: {
-            mayor: function () {
+            sorted: function () {
                 //first we sort the array descending
                 var candidatesSorted = this.candidates.sort(function (a, b) {
                     return b.votes - a.votes;
                 });
-                //the mayor will be the first item
-                return candidatesSorted[0];
+                return candidatesSorted;
+            },
+            winner: function () {
+                //the winner
+                return this.candidates.reduce((accum, candidate) => {
+                    if (accum.votes > candidate.votes) return accum;
+                    else if (accum.votes < candidate.votes) return candidate;
+                    else if (accum.votes === candidate.votes) return {name: "unknown, need more votes", votes: candidate.votes}
+                }
+              )
             }
         },
         methods: {
